@@ -1,0 +1,221 @@
+:PROPERTIES:
+:ID:       bbaf0c25-45a2-4ed2-9dcd-204e28777a3a
+:END:
+#+title: Phonemacs
+        #+created: [2024-08-07 Wed 11:44]
+        #+last_modified: [2024-08-07 Wed 11:44]
+
+[[id:78905830-a46f-4e11-93dc-ea77cb105d17][Literate Programming]] configuration for enabling a simple emacs editing environment on my phone with org-roam compatibility.
+
+This is an expansion of [[https://www.reddit.com/r/emacs/comments/16hwjby/how_to_get_graphical_not_termuxbased_emacs_on/][this tutorial]] for my own purposes. The files  mentioned in this readme (install.sh, early-init.el, and init.el) are also included in this repository for ease of use.
+
+* Quick-install
+ 1. Install [[https://f-droid.org/en/packages/juloo.keyboard2/][unexpected keyboard]], [[https://sourceforge.net/projects/android-ports-for-gnu-emacs/][emacs and termux]].
+ 2. In termux run:
+   #+begin_src bash
+     termux-setup-storage
+     pkg install git ripgrep fd llvm emacs
+     git clone git@github.com:alpinetortoise/phonemacs.git
+     phonemacs/install.sh
+#+end_src
+
+** Prerequisites
+I strongly suggest the use of [[https://github.com/Julow/Unexpected-Keyboard][Unexpected Keyboard]], as this provides both a C- and M- key to be able to utilise simple bindings.
+** Install.sh
+This script will setup symbolic links between the termux working environment and the emacs working environment and a shared emacs.d folder [fn:1]
+#+BEGIN_SRC bash :tangle install.sh
+  ln -s /data/data/org.gnu.emacs/files/ ~/emacs
+  ln -s ~/ ~/emacs/termux
+  mkdir ~/.emacs.d
+  ln -s ~/.emacs.d ~/emacs/.emacs.d
+  ln -s ~/storage ~/emacs/storage
+
+  cp *.el ~/.emacs.d/
+#+END_SRC
+
+* Early-init
+
+[[id:fe6dde6f-acfa-4285-834e-bfb8146c5b70][Termux and Emacs Preparation]]
+
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+    (setenv "PATH" (format "%s:%s" "/data/data/com.termux/files/usr/bin"
+                           (getenv "PATH")))
+    (setenv "LD_LIBRARY_PATH" (format "%s:%s"
+                                      "/data/data/com.termux/files/usr/lib"
+                                      (getenv "LD_LIBRARY_PATH")))
+    (push "/data/data/com.termux/files/usr/bin" exec-path)
+#+END_SRC
+
+
+* Custom
+#+begin_src emacs-lisp :tangle init.el
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+;; and `package-pinned-packages`. Most users will not need or want to do this.
+;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(package-initialize)
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("f079ef5189f9738cf5a2b4507bcaf83138ad22d9c9e32a537d61c9aae25502ef"
+     default))
+ '(package-selected-packages '(## org-bullets org-fragtog org-modern org-roam)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+#+END_SRC
+
+* Visual simplicity
+#+begin_src emacs-lisp :tangle init.el
+  (add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
+  (load-theme 'zenburn t)
+  (setq inhibit-startup-screen t)
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (visual-line-mode)
+#+END_SRC
+
+** font size
+Here is the font size I find that this height is good for my Samsung Galaxy S20
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (set-face-attribute
+   'default nil
+   ;;:font "Droid Sans Mono"
+   :height 190)
+#+end_src
+* ivy
+Ivy is a nice module for having autocomplete suggestions
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (use-package counsel)
+  (ivy-mode 1)
+#+END_SRC
+* TODO gnupg
+I don't have this working as yet, not too sure why, new to gnupg in general
+#+begin_src emacs-lisp :tangle init.el
+  (setq epg-gpg-program "gpg")
+  (setenv "GPG_AGENT_INFO" nil)
+  (require 'epa-file)
+  (epa-file-enable)
+  (setq org-roam-link-extensions '(".org" ".org.gpg"))
+#+end_src
+* Org-mode/roam
+** Agenda
+#+begin_src emacs-lisp :tangle init.el
+  (setq org-directory "~/Brain_2/")
+  (setq org-agenda-files (list "inbox.org"))
+#+end_src
+*** Agenda capture
+#+begin_src emacs-lisp :tangle init.el
+  (define-key global-map (kbd "C-c c") 'org-capture)
+  (setq org-capture-templates
+    `(("i" "Inbox" entry (file "inbox.org")
+      ,(concat "* TODO %?\n"
+               "%a\n"
+               "/Entered on/ %U"))))
+#+end_src
+** Org-modern
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-modern
+    :hook
+    (org-mode . global-org-modern-mode)
+    :custom
+    (org-modern-star 'replace)
+    (org-modern-replace-stars "§¤•·–")
+    (org-modern-keyword nil)
+    (org-modern-checkbox nil)
+    ;(org-modern-table nil)
+    )
+#+END_SRC
+** Org-Fragtog
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-fragtog
+    :after org
+    :custom
+    (org-startup-with-latex-preview t)
+    :hook
+    (org-mode . org-fragtog-mode)
+    :custom
+    (org-format-latex-options
+     (plist-put org-format-latex-options :scale 2)
+     (plist-put org-format-latex-options :foreground 'auto)
+     (plist-put org-format-latex-options :background 'auto)))
+#+end_src
+** Roam
+#+begin_src emacs-lisp :tangle init.el
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory "~/Brain_2")
+    (org-roam-dailies-directory "~/Brain_2/00-09 System/03 Dailies/")
+    (org-roam-completion-everywhere t)
+    (org-roam-dailies-capture-templates
+     '(("d" "default" entry "* %<%I:%M %p>: %?"
+        :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+    :bind (("C-c z l" . org-roam-buffer-toggle)
+           ("C-c z f" . org-roam-node-find)
+           ("C-c z i" . org-roam-node-insert):map org-mode-map
+           :map org-mode-map
+           ("C-M-i"    . completion-at-point)
+           :map org-roam-dailies-map
+           ("Y" . org-roam-dailies-capture-yesterday)
+           ("T" . org-roam-dailies-capture-tomorrow))
+    :bind-keymap
+    ("C-c z d" . org-roam-dailies-map)
+    :config
+    (require 'org-roam-dailies)
+    (org-roam-db-autosync-mode))
+#+end_src
+
+*** Capture
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (setq org-roam-capture-templates
+      '(("z" "Zettel" plain
+         "%?"
+         :if-new
+         (file+head "Z.0000 Zettelkasten/${slug}.org"
+          "#+title: ${title}
+          #+created: %U
+          #+last_modified: %U\n\n")
+         :immediate-finish t
+         :unnarrowed t)
+        ("r" "reference" plain
+         "%?"
+         :if-new
+         (file+head "00-09 System/01 Reference/${title}.org"
+                    "#+title: ${title}
+                    #+created: %U
+                    #+last_modified: %U\n\n")
+         :immediate-finish t
+         :unnarrowed t)
+        ("b" "blog" plain             ;;                (article)
+         "%?"
+         :if-new
+         (file+head "Website/${title}.org"
+                   "#+HUGO_BASE_DIR: ~/alpineTortoise
+                   #+HUGO_SECTION: ./posts
+                   #+HUGO_AUTO_SET_LASTMOD: t
+                   #+TITLE: ${title}
+                   #+DATE: %U
+                   #+HUGO_TAGS: article
+                   #+HUGO_DRAFT: true\n")
+         :immediate-finish t
+         :unnarrowed t)))
+#+END_SRC
+
+* Refs
+ [[id:b4457b15-19ee-4902-826c-89e424040782][Thoughts on Emacs/Org on phone]]
+
+* Footnotes
+
+[fn:1] There is a difference in version of emacs between termux and the native apk but the config files are version agnostic
