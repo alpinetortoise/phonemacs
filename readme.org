@@ -34,9 +34,6 @@ This script will setup symbolic links between the termux working environment and
 #+END_SRC
 
 * Early-init
-
-[[id:fe6dde6f-acfa-4285-834e-bfb8146c5b70][Termux and Emacs Preparation]]
-
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
     (setenv "PATH" (format "%s:%s" "/data/data/com.termux/files/usr/bin"
                            (getenv "PATH")))
@@ -177,7 +174,6 @@ I don't have this working as yet, not too sure why, new to gnupg in general
 #+end_src
 
 *** Capture
-
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq org-roam-capture-templates
       '(("z" "Zettel" plain
