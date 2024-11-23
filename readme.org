@@ -4,8 +4,7 @@
 #+title: Phonemacs
         #+created: [2024-08-07 Wed 11:44]
         #+last_modified: [2024-08-07 Wed 11:44]
-
-[[id:78905830-a46f-4e11-93dc-ea77cb105d17][Literate Programming]] configuration for enabling a simple emacs editing environment on my phone with org-roam compatibility.
+After fiddling with [[id:e81bca6e-f3cd-4bbd-ba06-fcf3dd3e41a8][Doom Emacs On Android]] I decided that Doom wasn't for me and transitioned back to Prelude, and rather than implementing Prelude in full on Android, I have developed this [[id:78905830-a46f-4e11-93dc-ea77cb105d17][literate programming]] configuration for enabling a simple emacs editing environment on my phone with org-roam compatibility.
 
 This is an expansion of [[https://www.reddit.com/r/emacs/comments/16hwjby/how_to_get_graphical_not_termuxbased_emacs_on/][this tutorial]] for my own purposes. The files  mentioned in this readme (install.sh, early-init.el, and init.el) are also included in this repository for ease of use.
 
