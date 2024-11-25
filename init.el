@@ -26,7 +26,7 @@
 (setq inhibit-startup-screen t)
 (menu-bar-mode -1)
 (tool-bar-mode -1)
-(visual-line-mode)
+(visual-line-mode 1)
 
 (set-face-attribute
  'default nil
@@ -40,7 +40,7 @@
 (setenv "GPG_AGENT_INFO" nil)
 (require 'epa-file)
 (epa-file-enable)
-(setq org-roam-link-extensions '(".org" ".org.gpg"))
+(setq org-roam-link-extensions '(".org")) ;; ".org.gpg")) ;; I don't have decryption working on my phone as yet
 
 (setq org-directory "~/Brain_2/")
 (setq org-agenda-files (list "inbox.org"))
@@ -88,7 +88,10 @@
       :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
   :bind (("C-c z l" . org-roam-buffer-toggle)
          ("C-c z f" . org-roam-node-find)
-         ("C-c z i" . org-roam-node-insert):map org-mode-map
+         ("C-c z i" . org-roam-node-insert)
+         ("C-c z c" . org-capture)
+         ("C-c z k" . org-id-get-create)
+         ("C-c z r" . org-roam-node-random)
          :map org-mode-map
          ("C-M-i"    . completion-at-point)
          :map org-roam-dailies-map

@@ -11,7 +11,7 @@ This is an expansion of [[https://www.reddit.com/r/emacs/comments/16hwjby/how_to
 * Quick-install
  1. Install [[https://f-droid.org/en/packages/juloo.keyboard2/][unexpected keyboard]], [[https://sourceforge.net/projects/android-ports-for-gnu-emacs/][emacs and termux]].
  2. In termux run:
-   #+begin_src bash
+#+begin_src bash
      termux-setup-storage
      pkg install git ripgrep fd llvm emacs
      git clone git@github.com:alpinetortoise/phonemacs.git
@@ -76,7 +76,7 @@ This script will setup symbolic links between the termux working environment and
   (setq inhibit-startup-screen t)
   (menu-bar-mode -1)
   (tool-bar-mode -1)
-  (visual-line-mode)
+  (visual-line-mode 1)
 #+END_SRC
 
 ** font size
@@ -100,7 +100,7 @@ I don't have this working as yet, not too sure why, new to gnupg in general
   (setenv "GPG_AGENT_INFO" nil)
   (require 'epa-file)
   (epa-file-enable)
-  (setq org-roam-link-extensions '(".org" ".org.gpg"))
+  (setq org-roam-link-extensions '(".org")) ;; ".org.gpg")) ;; I don't have decryption working on my phone as yet
 #+end_src
 * Org-mode/roam
 ** Agenda
@@ -159,7 +159,10 @@ I don't have this working as yet, not too sure why, new to gnupg in general
         :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
     :bind (("C-c z l" . org-roam-buffer-toggle)
            ("C-c z f" . org-roam-node-find)
-           ("C-c z i" . org-roam-node-insert):map org-mode-map
+           ("C-c z i" . org-roam-node-insert)
+           ("C-c z c" . org-capture)
+           ("C-c z k" . org-id-get-create)
+           ("C-c z r" . org-roam-node-random)
            :map org-mode-map
            ("C-M-i"    . completion-at-point)
            :map org-roam-dailies-map
